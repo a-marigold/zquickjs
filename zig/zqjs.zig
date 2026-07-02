@@ -36,26 +36,37 @@ pub fn main(init: std.process.Init) !void {
     var args = try init.minimal.args.iterateAllocator(arenaAllocator);
     defer args.deinit();
 
-    // const exeDirPath = try std.process.executableDirPathAlloc(io, arenaAllocator);
+    const exeDirPath = try std.process.executableDirPathAlloc(io, arenaAllocator);
 
     var zigBuildCmd = std.ArrayList([]const u8).empty;
     while (args.next()) |arg| {
-        zigBuildCmd.append(arenaAllocator, arg);
+        try zigBuildCmd.append(arenaAllocator, arg);
     }
 
-    const zigBuildCmdSlice = &zigBuildCmd.items;
-
-    if (zigBuildCmdSlice.len == 0) {
+    if (zigBuildCmd.items.len == 1) {
         try stdout.writeAll(HELP_TEXT);
         try stdout.flush();
         std.process.exit(1);
     }
 
-    // const zigBuildProcess = try std.process.spawn(io, .{
-    //     .argv = zigBuildCmdSlice,
-    //     .stdout = .inherit,
-    //     .stderr = .inherit,
-    // });
+    try zigBuildCmd.appendSlice(
+        arenaAllocator,
+        &.{
+            "zig",       "build",    "--build-file",
+            try std.mem.join(
+                arenaAllocator,
+                "/",
+                &.{ exeDirPath, zigFilePaths.buildFile },
+            ),
+            "-Dexe-dir", exeDirPath,
+        },
+    );
 
-    defer _ = zigBuildProcess.wait() catch {};
+    var zigBuildProcess = try std.process.spawn(io, .{
+        .argv = zigBuildCmd.items,
+        .stdout = .inherit,
+        .stderr = .inherit,
+    });
+
+    defer _ = zigBuildProcess.wait(io) catch {};
 }
