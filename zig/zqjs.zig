@@ -18,11 +18,14 @@ const HELP_TEXT =
     \\ -p              Prefix of path where to store 'bin' folder with executables.
     \\                 (e.g for '-p ./dist' executables are stored to './dist/bin').
 ;
+pub fn main(init: std.process.Init.Minimal) !void {
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+    const arenaAllocator = arena.allocator();
 
-pub fn main(init: std.process.Init) !void {
-    const io = init.io;
-
-    const arenaAllocator = init.arena.allocator();
+    var threaded = std.Io.Threaded.init(arenaAllocator, .{});
+    defer threaded.deinit();
+    const io = threaded.io();
 
     const stdoutBuffer: []u8 = undefined;
 
@@ -30,7 +33,7 @@ pub fn main(init: std.process.Init) !void {
 
     const stdout = &stdoutWriter.interface;
 
-    var args = try init.minimal.args.iterateAllocator(arenaAllocator);
+    var args = try init.args.iterateAllocator(arenaAllocator);
     defer args.deinit();
 
     const exeDirPath = try std.process.executableDirPathAlloc(io, arenaAllocator);
