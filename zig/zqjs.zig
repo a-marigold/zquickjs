@@ -4,17 +4,17 @@ const std = @import("std");
 
 const HELP_TEXT =
     \\usage: 
-    \\  -h              Print help.
-    \\  -Dzig-root      Path to zig root file. 
-    \\                  If omitted, the default files are used (which have 'zqjs:std').
-    \\  -Dinit-fn-name  Name of function in zig root that initializes modules.
-    \\                  Cannot be skiped if '-Dzig-root' is provided.
-    \\  -Djs-root       Path to '.js' root file (it must not import other '.js' files!).
-    \\  -Dtarget        Zig compiler target.
-    \\  -Doptimize      Zig compiler optimization (Debug, ReleaseSafe, ReleaseSmall, ReleaseFast).
-    \\
-    \\  -p              Prefix of path where to store 'bin' folder with executables.
-    \\                  (e.g for '-p ./dist' executables are stored to './dist/bin').
+    \\ -h              Print help.
+    \\ -Dzig-root      Path to zig root file. 
+    \\                 If omitted, the default root is used (which has 'zqjs:std').
+    \\                 Cannot be omitted if '-Dinit-fn-name' is provided.
+    \\ -Dinit-fn-name  Name of function in zig root that initializes modules.
+    \\                 Cannot be omitted if '-Dzig-root' is provided.
+    \\ -Djs-root       Path to '.js' root file (it must not import other '.js' files!).
+    \\ -Dtarget        Zig compiler target.
+    \\ -Doptimize      Zig compiler optimization (Debug, ReleaseSafe, ReleaseSmall, ReleaseFast).
+    \\ -p              Prefix of path where to store 'bin' folder with executables.
+    \\                 (e.g for '-p ./dist' executables are stored to './dist/bin').
 ;
 const zigFilePaths = struct {
     pub const buildFile = "bld.zig";
