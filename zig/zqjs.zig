@@ -1,6 +1,8 @@
-//! `zqjs` CLI
+//! 'zqjs' CLI
 
 const std = @import("std");
+
+const constants = @import("constants.zig");
 
 const HELP_TEXT =
     \\usage: 
@@ -10,17 +12,12 @@ const HELP_TEXT =
     \\                 Cannot be omitted if '-Dinit-fn-name' is provided.
     \\ -Dinit-fn-name  Name of function in zig root that initializes modules.
     \\                 Cannot be omitted if '-Dzig-root' is provided.
-    \\ -Djs-root       Path to '.js' root file (it must not import other '.js' files!).
+    \\ -Djs-root       Path to '.js' root file (it must not import other '.js' files).
     \\ -Dtarget        Zig compiler target.
     \\ -Doptimize      Zig compiler optimization (Debug, ReleaseSafe, ReleaseSmall, ReleaseFast).
     \\ -p              Prefix of path where to store 'bin' folder with executables.
     \\                 (e.g for '-p ./dist' executables are stored to './dist/bin').
 ;
-const zigFilePaths = struct {
-    pub const buildFile = "bld.zig";
-    pub const qjsBindings = "qjs.zig";
-    pub const zqjsStd = "std.zig";
-};
 
 pub fn main(init: std.process.Init) !void {
     const io = init.io;
@@ -56,8 +53,9 @@ pub fn main(init: std.process.Init) !void {
             try std.mem.join(
                 arenaAllocator,
                 "/",
-                &.{ exeDirPath, zigFilePaths.buildFile },
+                &.{ exeDirPath, constants.exeDirPaths.buildFile },
             ),
+
             "-Dexe-dir", exeDirPath,
         },
     );
