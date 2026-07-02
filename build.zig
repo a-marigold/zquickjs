@@ -14,4 +14,10 @@ pub fn build(b: *std.Build) void {
         }),
     });
     b.installArtifact(zqjsExe);
+
+    const zqjsCheck = b.addExecutable(.{
+        .name = "zqjsCheck",
+        .root_module = zqjsExe.root_module,
+    });
+    b.step("check", "Build on save").dependOn(&zqjsCheck.step);
 }
