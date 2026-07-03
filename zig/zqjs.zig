@@ -30,6 +30,7 @@ pub fn main(init: std.process.Init.Minimal) !void {
 
     var threaded = std.Io.Threaded.init(arenaAllocator, .{});
     defer threaded.deinit();
+
     const io = threaded.io();
 
     const stdoutBuffer: []u8 = undefined;
@@ -44,14 +45,27 @@ pub fn main(init: std.process.Init.Minimal) !void {
     const exeDirPath = try std.process.executableDirPathAlloc(io, arenaAllocator);
 
     var zigBuildCmd = std.ArrayList([]const u8).empty;
-    while (args.next()) |arg| {
-        try zigBuildCmd.append(arenaAllocator, arg);
-    }
 
-    if (zigBuildCmd.items.len == 1) {
+    _ = args.skip();
+
+    if (args.next()) |firstArg| {
+        if (std.mem.eql(u8, @as([]const u8, "-h"), firstArg)) {
+            try stdout.writeAll(HELP_TEXT);
+            try stdout.flush();
+
+            std.process.exit(0);
+        } else {
+            try zigBuildCmd.append(arenaAllocator, firstArg);
+        }
+    } else {
         try stdout.writeAll(HELP_TEXT);
         try stdout.flush();
+
         std.process.exit(1);
+    }
+
+    while (args.next()) |arg| {
+        try zigBuildCmd.append(arenaAllocator, arg);
     }
 
     try zigBuildCmd.appendSlice(
