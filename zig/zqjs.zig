@@ -5,18 +5,23 @@ const std = @import("std");
 const constants = @import("constants.zig");
 
 const HELP_TEXT =
-    \\usage: 
+    \\usage:
+    \\ zqjs -flag-example=value
+    \\
     \\ -h              Print help.
-    \\ -Dzig-root      Path to zig root file. 
+    \\ -o              Path to dir where to output executables.
+    \\ -Dzig-root      Path to zig root file.
     \\                 If omitted, the default root is used (which has 'zqjs:std').
     \\                 Cannot be omitted if '-Dinit-fn-name' is provided.
-    \\ -Dinit-fn-name  Name of function in zig root that initializes modules.
+    \\ -Dinit-fn-name  Name of function in zig root that initializes custom JS modules.
     \\                 Cannot be omitted if '-Dzig-root' is provided.
     \\ -Djs-root       Path to '.js' root file (it must not import other '.js' files).
     \\ -Dtarget        Zig compiler target.
     \\ -Doptimize      Zig compiler optimization (Debug, ReleaseSafe, ReleaseSmall, ReleaseFast).
-    \\ -p              Prefix of path where to store 'bin' folder with executables.
-    \\                 (e.g for '-p ./dist' executables are stored to './dist/bin').
+    \\ -Dflto          Whether to enable '-flto' flag for quickjs C files compilation.
+    \\ -Dopt-lvl       Optimization level for quickjs C files compilation.
+    \\                 Default to 'O0'.
+    \\                 Example: '-Dopt-lvl=O3' or '-Dopt-lvl=Oz'.
 ;
 pub fn main(init: std.process.Init.Minimal) !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
