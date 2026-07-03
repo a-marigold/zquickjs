@@ -4,6 +4,15 @@ const std = @import("std");
 
 const constants = @import("constants.zig");
 
+const OptLvl = enum {
+    O0,
+    O1,
+    O2,
+    O3,
+    Os,
+    Oz,
+};
+
 pub fn build(b: *std.Build) void {
     const initFnName = b.option(
         []const u8,
@@ -83,8 +92,29 @@ pub fn build(b: *std.Build) void {
         quickJsPaths.append(b.allocator, name);
     }
 
+    const flto: []const u8 = if (b.option(
+        []const u8,
+        "flto",
+        "Whether to enable '-flto' for quickjs C source files compilation",
+    )) "-flto" else "";
+
+    const optLvl: []const u8 = switch (b.option(
+        OptLvl,
+        "opt-lvl",
+        "Optimization level for quickjs C source files compilation",
+    )) {
+        .O0, null => "-O0",
+        .O1 => "-O1",
+        .O2 => "-O2",
+        .O3 => "-O3",
+        .Os => "-Os",
+        .Oz => "-Oz",
+    };
+
     zigRootLib.root_module.addCSourceFiles(.{
         .files = quickJsPaths.items,
-        .flags = &.{},
+        .flags = &.{
+            flto, optLvl,
+        },
     });
 }
