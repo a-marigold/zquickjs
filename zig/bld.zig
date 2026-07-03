@@ -10,11 +10,9 @@ pub fn build(b: *std.Build) void {
         "init-fn-name",
         "Name of modules init function",
     );
-
     const zigRoot = b.option(
         []const u8,
         "zig-root",
-
         "Path to root zig file",
     );
 
@@ -38,6 +36,38 @@ pub fn build(b: *std.Build) void {
     ) orelse {
         @panic("'-Dexe-dir' is required");
     };
+
+    const qjscOutputPath = std.mem.join(
+        b.allocator,
+        "/",
+        &.{ b.tmpPath().src_path.sub_path, "b_c" },
+    );
+
+    const runQjsc = b.addSystemCommand(&.{std.mem.join(
+        b.allocator,
+        "/",
+
+        &.{
+            exeDir,
+            constants.ExeDirPaths.qjscExe,
+        },
+        // Generate only bytecode
+        "-c",
+
+        // Strip debug bytecodes
+        "-s",
+
+        // Set the bytecode C identifier name
+        "-N",
+        "b_c",
+
+        // Set the output file
+        "-o",
+        qjscOutputPath,
+
+        // Input file
+        jsRoot,
+    )});
 
     const zigRootLib = b.addLibrary(.{
         .name = "zig-root-lib",
