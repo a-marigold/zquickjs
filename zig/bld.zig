@@ -77,5 +77,14 @@ pub fn build(b: *std.Build) void {
         .linkage = .static,
     });
 
-    zigRootLib.root_module.addCSourceFiles();
+    var quickJsPaths = std.ArrayList([]const u8).empty;
+
+    for (constants.QuickJsFileNames) |name| {
+        quickJsPaths.append(b.allocator, name);
+    }
+
+    zigRootLib.root_module.addCSourceFiles(.{
+        .files = quickJsPaths.items,
+        .flags = &.{},
+    });
 }
