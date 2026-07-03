@@ -52,14 +52,14 @@ pub fn main(init: std.process.Init.Minimal) !void {
     try zigBuildCmd.appendSlice(
         arenaAllocator,
         &.{
-            "zig",       "build",    "--build-file",
+            "zig",        "build",    "--build-file",
             try std.mem.join(
                 arenaAllocator,
                 "/",
-                &.{ exeDirPath, constants.exeDirPaths.buildFile },
+                &.{ exeDirPath, constants.ExeDirPaths.buildFile },
             ),
 
-            "-Dexe-dir", exeDirPath,
+            "-Dzqjs-dir", exeDirPath,
         },
     );
 
@@ -71,3 +71,5 @@ pub fn main(init: std.process.Init.Minimal) !void {
 
     defer _ = zigBuildProcess.wait(io) catch {};
 }
+
+pub const panic = std.debug.no_panic;

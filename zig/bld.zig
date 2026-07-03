@@ -29,12 +29,12 @@ pub fn build(b: *std.Build) void {
     ) orelse {
         @panic("'-Djs-root' is required.");
     };
-    const exeDir = b.option(
+    const zqjsDir = b.option(
         []const u8,
-        "exe-dir",
-        "Path to the directory where 'zqjs' CLI and the 'build.zig' file are located",
+        "zqjs-dir",
+        "Path to the directory where 'zqjs' CLI, 'bld.zig' and quickjs soruce code files are located",
     ) orelse {
-        @panic("'-Dexe-dir' is required");
+        @panic("'-zqjs-dir' is required");
     };
 
     const qjscOutputPath = std.mem.join(
@@ -43,12 +43,12 @@ pub fn build(b: *std.Build) void {
         &.{ b.tmpPath().src_path.sub_path, "b_c" },
     );
 
-    const runQjsc = b.addSystemCommand(&.{std.mem.join(
+    b.addSystemCommand(&.{std.mem.join(
         b.allocator,
         "/",
 
         &.{
-            exeDir,
+            zqjsDir,
             constants.ExeDirPaths.qjscExe,
         },
         // Generate only bytecode
