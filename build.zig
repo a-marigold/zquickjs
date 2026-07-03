@@ -14,9 +14,12 @@ pub fn build(b: *std.Build) void {
             .target = target,
             .optimize = optimize,
             .single_threaded = true,
+            .unwind_tables = .none,
         }),
     });
-    b.installArtifact(zqjsExe);
+    installStep.dependOn(
+        &b.addInstallArtifact(zqjsExe, .{ .dest_dir = .{ .override = .prefix } }).step,
+    );
 
     const zqjsCheck = b.addExecutable(.{
         .name = "zqjsCheck",
