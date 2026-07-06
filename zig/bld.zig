@@ -86,12 +86,6 @@ pub fn build(b: *std.Build) void {
         .linkage = .static,
     });
 
-    var quickJsPaths = std.ArrayList([]const u8).empty;
-
-    for (constants.QuickJsFileNames) |name| {
-        quickJsPaths.append(b.allocator, name);
-    }
-
     const flto: []const u8 = if (b.option(
         []const u8,
         "flto",
@@ -112,9 +106,10 @@ pub fn build(b: *std.Build) void {
     };
 
     zigRootLib.root_module.addCSourceFiles(.{
-        .files = quickJsPaths.items,
+        .files = constants.QuickJsFileNames,
         .flags = &.{
             flto, optLvl,
         },
+        .language = .c,
     });
 }

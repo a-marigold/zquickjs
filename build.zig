@@ -29,7 +29,6 @@ pub fn build(b: *std.Build) void {
             .link_libc = true,
         }),
     });
-
     qjscExe.root_module.addCSourceFiles(.{
         .files = &.{
             "qjsc.c",
@@ -63,6 +62,7 @@ pub fn build(b: *std.Build) void {
             .unwind_tables = .none,
         }),
     });
+
     installStep.dependOn(
         &b.addInstallArtifact(zqjsExe, INSTALL_ARTIFACT_OPTIONS).step,
     );
@@ -73,12 +73,19 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("quickjs-libc.h"),
         .target = target,
         .optimize = optimize,
+
         .link_libc = true,
     });
-
     installStep.dependOn(&b.addInstallFile(
         translateQuickjs.getOutput(),
+
         "qjs.zig",
+    ).step);
+
+    installStep.dependOn(&b.addInstallFile(
+        b.path("zig/bld.zig"),
+
+        constants.ExeDirPaths.buildFile,
     ).step);
 
     const installQuickjsFiles = b.step("install-quickjs", "Install quickjs source C files to output");
@@ -86,6 +93,5 @@ pub fn build(b: *std.Build) void {
     for (constants.QuickJsFileNames) |name| {
         installQuickjsFiles.dependOn(&b.addInstallFile(b.path(name), name).step);
     }
-
     installStep.dependOn(installQuickjsFiles);
 }

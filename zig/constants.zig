@@ -1,4 +1,4 @@
-/// Paths to files (helpers) in the directory where 'zqjs' is located.
+/// Paths to files (`zqjs` helpers) in the directory where `zqjs.exe` is located.
 pub const ExeDirPaths = struct {
     pub const buildFile = "bld.zig";
     pub const qjsBindings = "qjs.zig";
