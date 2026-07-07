@@ -10,11 +10,18 @@ permissions:
 jobs: 
   release draft: 
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
+      
       - name: set up zig
         uses: mlugg/setup-zig@v2
+
+      - name: cache '.zig-cache'
+        uses: actions/cache@v4
+        with: 
+          path: ./.zig-cache
+          key: zig-cache
+
       
       - name: build
         run: | 
@@ -62,8 +69,4 @@ jobs:
           files: | 
             zig-out/
 
-      - name: cache '.zig-cache'
-        uses: actions/cache@v4
-        with: 
-          path: ./.zig-cache
-          key: zig-cache
+      
