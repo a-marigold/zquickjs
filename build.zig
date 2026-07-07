@@ -100,13 +100,11 @@ pub fn build(b: *std.Build) void {
     });
     installStep.dependOn(&b.addInstallFile(
         translateQuickjs.getOutput(),
-
         "qjs.zig",
     ).step);
 
     installStep.dependOn(&b.addInstallFile(
         b.path("zig/bld.zig"),
-
         constants.ExeDirPaths.buildFile,
     ).step);
 
@@ -116,4 +114,25 @@ pub fn build(b: *std.Build) void {
         installQuickjsFiles.dependOn(&b.addInstallFile(b.path(name), name).step);
     }
     installStep.dependOn(installQuickjsFiles);
+
+    const testStep = b.step("test", "Run 'zqjs' tests");
+
+    const zqjsTest = b.addTest(.{
+        .name = "test",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("zig/__tests__/zqjs.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
+    });
+    const zqjsTestOptions = b.addOptions();
+    zqjsTestOptions.addOption(
+        []const u8,
+        "ZQJS_EXE_DIR",
+        zqjsExe.getEmittedBin().generated.sub_path,
+    );
+    zqjsTest.root_module.addOptions("test_options", zqjsTestOptions);
+
+    const runZqjsTest = b.addRunArtifact(zqjsTest);
+    testStep.dependOn(&runZqjsTest.step);
 }

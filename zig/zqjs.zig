@@ -4,6 +4,8 @@ const std = @import("std");
 
 const constants = @import("constants.zig");
 
+pub const panic = std.debug.no_panic;
+
 const HELP_TEXT =
     \\usage:
     \\ zqjs -flag-example=value
@@ -88,5 +90,3 @@ pub fn main(init: std.process.Init.Minimal) !void {
     });
     _ = zigBuildProcess.wait(io) catch {};
 }
-
-pub const panic = std.debug.no_panic;
