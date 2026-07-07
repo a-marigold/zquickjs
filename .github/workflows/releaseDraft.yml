@@ -1,0 +1,50 @@
+name: release draft
+
+on: 
+  push: 
+    tags: 'v*'
+
+permissions:
+  contents: write
+
+jobs: 
+  release draft: 
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: set up zig
+        uses: mlugg/setup-zig@v2
+      
+      - name: build
+        run: | 
+          VERSION=github.ref_name
+
+          OPT="-Doptimize=ReleaseSmall -DoptimizeC"
+
+          zig build $OPT -Dtarget=x86_64-linux-gnu -p ./zqjs-${VERSION}-x86_64-linux-gnu
+          zig build $OPT -Dtarget=x86_64-linux-musl -p ./zqjs-${VERSION}-x86_64-linux-musl
+
+          zig build $OPT -Dtarget=aarch64-linux-gnu -p ./zqjs-${VERSION}-aarch64-linux-gnu
+          zig build $OPT -Dtarget=aarch64-linux-musl -p ./zqjs-${VERSION}-aarch64-linux-musl
+
+          zig build $OPT -Dtarget=x86_64-macos -p ./zqjs-${VERSION}-x86_64-macos
+          zig build $OPT -Dtarget=aarch64-macos -p ./zqjs-${VERSION}-arm64-macos
+
+          zig build $OPT -Dtarget=x86_64-windows -p ./zqjs-${VERSION}-x86_64-win
+          zig build $OPT -Dtarget=aarch64-windows -p ./zqjs-${VERSION}-arm64-win
+
+      - name: create draft
+        uses: softprops/action-gh-release@v2
+        with:
+          name: github.ref_name
+          draft: true
+          generate_release_notes: false
+          files: | 
+            zig-out/
+
+      - name: cache '.zig-cache'
+        uses: actions/cache@v4
+        with: 
+          path: ./.zig-cache
+          key: zig-cache
