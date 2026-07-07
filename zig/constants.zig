@@ -17,7 +17,12 @@ pub const QuickJsFileNames = [_][]const u8{
     "libunicode.c",
 };
 
-/// `-DCONFIG_VERSION` flag from quickjs Makefile.
-/// Can be given via running `cat ./VERSION` in the root of the repo.
-///
-pub const QUICKJS_DCONFIG_VERSION_FLAG = "-DCONFIG_VERSION=\"2026-06-04\"";
+/// Flags to be provided to C compiler for quickjs compilation.
+/// They contains both name and value and can be passed to argv without transforming.
+pub const QuickJsCFlags = struct {
+    /// Only for GNU linux.
+    pub const LINUX_GNU_SOURCE = "-D_GNU_SOURCE";
+
+    /// Received from running `cat ./VERSION` in the root of the repo.
+    pub const CONFIG_VERSION = "-DCONFIG_VERSION=\"2026-06-04\"";
+};

@@ -37,25 +37,24 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
-    const qjscFlags: []const []const u8 = switch (target.result.os.tag) {
-        .linux => if (optimizeC == true) &.{
+    const qjscFlags: []const []const u8 =
+        if (target.result.os.tag == .linux and target.result.abi == .gnu)
+            if (optimizeC == true) &.{
+                "-O3",
+                "-flto",
+                constants.QuickJsCFlags.LINUX_GNU_SOURCE,
+                constants.QuickJsCFlags.CONFIG_VERSION,
+            } else &.{
+                constants.QuickJsCFlags.LINUX_GNU_SOURCE,
+                constants.QuickJsCFlags.CONFIG_VERSION,
+            }
+        else if (optimizeC == true) &.{
             "-O3",
             "-flto",
-            constants.QuickJsCFlags.LINUX_GNU_SOURCE,
-            constants.QuickJsCFlags.CONFIG_VERSION,
-        } else &.{
-            constants.QuickJsCFlags.LINUX_GNU_SOURCE,
-            constants.QuickJsCFlags.CONFIG_VERSION,
-        },
-
-        else => if (optimizeC == true) &.{
-            "-O3",
-            "-flto",
             constants.QuickJsCFlags.CONFIG_VERSION,
         } else &.{
             constants.QuickJsCFlags.CONFIG_VERSION,
-        },
-    };
+        };
 
     qjscExe.root_module.addCSourceFiles(.{
         .files = &.{
