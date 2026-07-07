@@ -7,6 +7,12 @@ const INSTALL_ARTIFACT_OPTIONS: std.Build.Step.InstallArtifact.Options = .{
 };
 
 pub fn build(b: *std.Build) void {
+    const optimizeC = b.option(
+        bool,
+        "optimizeC",
+        "Whether to apply '-O3' and '-flto' for quickjs C files",
+    );
+
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
     const installStep = b.getInstallStep();
@@ -39,11 +45,11 @@ pub fn build(b: *std.Build) void {
             "libregexp.c",
             "dtoa.c",
         },
-        .flags = &.{
-            "-Oz",
+        .flags = if (optimizeC == true) &.{
+            "-O3",
             "-flto",
             constants.QUICKJS_DCONFIG_VERSION_FLAG,
-        },
+        } else &.{constants.QUICKJS_DCONFIG_VERSION_FLAG},
 
         .language = .c,
     });
