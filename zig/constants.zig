@@ -18,10 +18,6 @@ pub const QuickJsFileNames = [_][]const u8{
 };
 
 /// `-DCONFIG_VERSION` flag from quickjs Makefile.
+/// Can be given via running `cat ./VERSION` in the root of the repo.
 ///
-///
-///
-///
-///
-/// Can be given via running 'cat ./VERSION' in the root of repo.
 pub const QUICKJS_DCONFIG_VERSION_FLAG = "-DCONFIG_VERSION=\"2026-06-04\"";

@@ -36,7 +36,6 @@ pub fn main(init: std.process.Init.Minimal) !void {
     const stdoutBuffer: []u8 = undefined;
 
     var stdoutWriter = std.Io.File.stdout().writer(io, stdoutBuffer);
-
     const stdout = &stdoutWriter.interface;
 
     var args = try init.args.iterateAllocator(arenaAllocator);
@@ -87,8 +86,7 @@ pub fn main(init: std.process.Init.Minimal) !void {
         .stdout = .inherit,
         .stderr = .inherit,
     });
-
-    defer _ = zigBuildProcess.wait(io) catch {};
+    _ = zigBuildProcess.wait(io) catch {};
 }
 
 pub const panic = std.debug.no_panic;
