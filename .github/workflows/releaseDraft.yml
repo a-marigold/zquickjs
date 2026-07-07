@@ -18,21 +18,40 @@ jobs:
       
       - name: build
         run: | 
-          VERSION=github.ref_name
-
+          VERSION=${{github.ref_name}}
           OPT="-Doptimize=ReleaseSmall -DoptimizeC"
+          
+          TARGET=x86_64-linux-gnu
+          zig build $OPT -Dtarget=$TARGET -p $TARGET
+          tar --zstd -cf zqjs-$VERSION-$TARGET.tar.zst -C $TARGET .
 
-          zig build $OPT -Dtarget=x86_64-linux-gnu -p ./zqjs-${VERSION}-x86_64-linux-gnu
-          zig build $OPT -Dtarget=x86_64-linux-musl -p ./zqjs-${VERSION}-x86_64-linux-musl
+          TARGET=x86_64-linux-musl
+          zig build $OPT -Dtarget=$TARGET -p $TARGET
+          tar --zstd -cf zqjs-$VERSION-$TARGET.tar.zst -C $TARGET .
 
-          zig build $OPT -Dtarget=aarch64-linux-gnu -p ./zqjs-${VERSION}-aarch64-linux-gnu
-          zig build $OPT -Dtarget=aarch64-linux-musl -p ./zqjs-${VERSION}-aarch64-linux-musl
+          TARGET=aarch64-linux-gnu
+          zig build $OPT -Dtarget=$TARGET -p $TARGET
+          tar --zstd -cf zqjs-$VERSION-$TARGET.tar.zst -C $TARGET .
 
-          zig build $OPT -Dtarget=x86_64-macos -p ./zqjs-${VERSION}-x86_64-macos
-          zig build $OPT -Dtarget=aarch64-macos -p ./zqjs-${VERSION}-arm64-macos
+          TARGET=aarch64-linux-musl
+          zig build $OPT -Dtarget=$TARGET -p $TARGET
+          tar --zstd -cf zqjs-$VERSION-$TARGET.tar.zst -C $TARGET .
 
-          zig build $OPT -Dtarget=x86_64-windows -p ./zqjs-${VERSION}-x86_64-win
-          zig build $OPT -Dtarget=aarch64-windows -p ./zqjs-${VERSION}-arm64-win
+          TARGET=x86_64-macos
+          zig build $OPT -Dtarget=$TARGET -p $TARGET
+          tar --zstd -cf zqjs-$VERSION-$TARGET.tar.zst -C $TARGET .
+
+          TARGET=aarch64-macos
+          zig build $OPT -Dtarget=$TARGET -p $TARGET
+          tar --zstd -cf zqjs-$VERSION-$TARGET.tar.zst -C $TARGET .
+
+          TARGET=x86_64-windows
+          zig build $OPT -Dtarget=$TARGET-gnu -p $TARGET
+          tar -caf zqjs-$VERSION-$TARGET.zip -C $TARGET .
+
+          TARGET=aarch64-windows
+          zig build $OPT -Dtarget=$TARGET-gnu -p $TARGET
+          tar -caf zqjs-$VERSION-$TARGET.zip -C $TARGET .
 
       - name: create draft
         uses: softprops/action-gh-release@v2
