@@ -108,12 +108,12 @@ pub fn build(b: *std.Build) void {
         constants.ExeDirPaths.buildFile,
     ).step);
 
-    const installQuickjsFiles = b.step("install-quickjs", "Install quickjs source C files to output");
+    const installQuickjsFilesStep = b.step("install-quickjs", "Install quickjs source C files to output");
 
     for (constants.QuickJsFileNames) |name| {
-        installQuickjsFiles.dependOn(&b.addInstallFile(b.path(name), name).step);
+        installQuickjsFilesStep.dependOn(&b.addInstallFile(b.path(name), name).step);
     }
-    installStep.dependOn(installQuickjsFiles);
+    installStep.dependOn(installQuickjsFilesStep);
 
     const testStep = b.step("test", "Run 'zqjs' tests");
 
@@ -125,14 +125,8 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         }),
     });
-    const zqjsTestOptions = b.addOptions();
-    zqjsTestOptions.addOption(
-        []const u8,
-        "ZQJS_EXE_DIR",
-        zqjsExe.getEmittedBin().generated.sub_path,
-    );
-    zqjsTest.root_module.addOptions("test_options", zqjsTestOptions);
 
     const runZqjsTest = b.addRunArtifact(zqjsTest);
+    runZqjsTest.step.dependOn(&zqjsTest.step);
     testStep.dependOn(&runZqjsTest.step);
 }
