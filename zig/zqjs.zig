@@ -35,10 +35,10 @@ pub fn main(init: std.process.Init.Minimal) !void {
 
     const io = threaded.io();
 
-    const stdoutBuffer: []u8 = undefined;
+    const stderrBUffer: []u8 = undefined;
 
-    var stdoutWriter = std.Io.File.stdout().writer(io, stdoutBuffer);
-    const stdout = &stdoutWriter.interface;
+    var stderrWriter = std.Io.File.stdout().writer(io, stderrBUffer);
+    const stderr = &stderrWriter.interface;
 
     var args = try init.args.iterateAllocator(arenaAllocator);
     defer args.deinit();
@@ -51,16 +51,16 @@ pub fn main(init: std.process.Init.Minimal) !void {
 
     if (args.next()) |firstArg| {
         if (std.mem.eql(u8, @as([]const u8, "-h"), firstArg)) {
-            try stdout.writeAll(HELP_TEXT);
-            try stdout.flush();
+            try stderr.writeAll(HELP_TEXT);
+            try stderr.flush();
 
             std.process.exit(0);
         } else {
             try zigBuildCmd.append(arenaAllocator, firstArg);
         }
     } else {
-        try stdout.writeAll(HELP_TEXT);
-        try stdout.flush();
+        try stderr.writeAll(HELP_TEXT);
+        try stderr.flush();
 
         std.process.exit(1);
     }
@@ -85,8 +85,6 @@ pub fn main(init: std.process.Init.Minimal) !void {
 
     var zigBuildProcess = try std.process.spawn(io, .{
         .argv = zigBuildCmd.items,
-        .stdout = .inherit,
-        .stderr = .inherit,
     });
     _ = zigBuildProcess.wait(io) catch {};
 }

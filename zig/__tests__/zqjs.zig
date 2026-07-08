@@ -56,3 +56,21 @@ fn expectChildProcess(
         try testing.expectEqual(exitCode, actual.term.exited);
     }
 }
+
+/// `argv` must omit path to `zqjs` binary 'cause it is included in the function.
+fn runZqjs(comptime n: usize, argv: [n]u8) !std.process.RunResult {
+    return std.process.run(
+        allocator,
+        io,
+        .{ .argv = &(.{ZQJS_EXE_PATH} ++ argv) },
+    );
+}
+
+test "Help printing to 'stderr' and exiting with code '1' when only 'argv' length is 1" {
+    const actual = try runZqjs(.{});
+
+    try expectChildProcess(
+        .{ .stderrSnapshotPath = "snapshots/help_text_err", .exitCode = 1 },
+        actual,
+    );
+}
