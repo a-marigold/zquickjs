@@ -35,9 +35,8 @@ pub fn main(init: std.process.Init.Minimal) !void {
 
     const io = threaded.io();
 
-    const stderrBUffer: []u8 = undefined;
+    var stderrWriter = std.Io.File.stderr().writer(io, &.{});
 
-    var stderrWriter = std.Io.File.stdout().writer(io, stderrBUffer);
     const stderr = &stderrWriter.interface;
 
     var args = try init.args.iterateAllocator(arenaAllocator);
@@ -51,7 +50,7 @@ pub fn main(init: std.process.Init.Minimal) !void {
 
     if (args.next()) |firstArg| {
         if (std.mem.eql(u8, @as([]const u8, "-h"), firstArg)) {
-            try stderr.writeAll(HELP_TEXT);
+            _ = try stderr.write(HELP_TEXT);
             try stderr.flush();
 
             std.process.exit(0);
@@ -59,7 +58,7 @@ pub fn main(init: std.process.Init.Minimal) !void {
             try zigBuildCmd.append(arenaAllocator, firstArg);
         }
     } else {
-        try stderr.writeAll(HELP_TEXT);
+        _ = try stderr.write(HELP_TEXT);
         try stderr.flush();
 
         std.process.exit(1);
