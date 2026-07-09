@@ -10,7 +10,6 @@ const HELP_TEXT =
     \\usage:
     \\ zqjs -flag-example=value
     \\
-    \\ -h              Print help.
     \\ -o              Path to dir where to output executables.
     \\ -Dzig-root      Path to zig root file.
     \\                 If omitted, the default root is used (which has 'zqjs:std').
@@ -35,8 +34,8 @@ pub fn main(init: std.process.Init.Minimal) !void {
 
     const io = threaded.io();
 
+    // Intended to use empty slice for unbuffered i/o
     var stderrWriter = std.Io.File.stderr().writer(io, &.{});
-
     const stderr = &stderrWriter.interface;
 
     var args = try init.args.iterateAllocator(arenaAllocator);
@@ -48,18 +47,10 @@ pub fn main(init: std.process.Init.Minimal) !void {
 
     _ = args.skip();
 
-    if (args.next()) |firstArg| {
-        if (std.mem.eql(u8, @as([]const u8, "-h"), firstArg)) {
-            _ = try stderr.write(HELP_TEXT);
-            try stderr.flush();
-
-            std.process.exit(0);
-        } else {
-            try zigBuildCmd.append(arenaAllocator, firstArg);
-        }
+    if (args.next()) |arg| {
+        try zigBuildCmd.append(arenaAllocator, arg);
     } else {
-        _ = try stderr.write(HELP_TEXT);
-        try stderr.flush();
+        _ = try stderr.vtable.drain(stderr, &.{HELP_TEXT}, 1);
 
         std.process.exit(1);
     }
