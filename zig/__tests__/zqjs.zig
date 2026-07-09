@@ -4,7 +4,8 @@ const testing = std.testing;
 const allocator = testing.allocator;
 const io = testing.io;
 
-const ZQJS_EXE_PATH = "../../zig-out/zqjs.exe";
+const ZQJS_EXE_PATH = "zig-out/zqjs.exe";
+const SNAPSHOTS_PATH = "zig/__tests__/snapshots/";
 
 /// Checks is the data of `snapshotPath` file equal to `actual`
 ///
@@ -15,15 +16,15 @@ fn expectMatchSnapshot(
 ) !void {
     const cwd = std.Io.Dir.cwd();
 
-    const expected = try (cwd.readFileAlloc(
+    const expected = cwd.readFileAlloc(
         io,
         snapshotPath,
         allocator,
         .unlimited,
     ) catch |err| {
         switch (err) {
-            .FileNotFound => {
-                cwd.writeFile(io, .{
+            error.FileNotFound => {
+                try cwd.writeFile(io, .{
                     .sub_path = snapshotPath,
 
                     .data = actual,
@@ -33,15 +34,15 @@ fn expectMatchSnapshot(
             },
             else => return err,
         }
-    });
+    };
+    defer allocator.free(expected);
 
     try testing.expectEqualStrings(expected, actual);
 }
 
-/// Checks do `expected.stdoutSnapshotPath` and `expected.stderrSnapshotPath` equal to
-/// `actual.stdout` and `actual.stderr` via `expectMatchSnapshot`.
+/// Checks `expected.stdoutSnapshotPath` and `expected.stderrSnapshotPath` via `expectMatchSnapshot`.
 fn expectChildProcess(
-    expected: struct { stdoutSnapshotPath: ?[]const u8, stderrSnapshotPath: ?[]const u8, exitCode: ?u8 },
+    expected: struct { stdoutSnapshotPath: ?[]const u8 = null, stderrSnapshotPath: ?[]const u8 = null, exitCode: ?u8 = null },
     actual: std.process.RunResult,
 ) !void {
     if (expected.stdoutSnapshotPath) |snapshotPath| {
@@ -58,19 +59,32 @@ fn expectChildProcess(
 }
 
 /// `argv` must omit path to `zqjs` binary 'cause it is included in the function.
-fn runZqjs(comptime n: usize, argv: [n]u8) !std.process.RunResult {
+fn runZqjs(comptime n: usize, argv: [n][]const u8) !std.process.RunResult {
     return std.process.run(
         allocator,
         io,
-        .{ .argv = &(.{ZQJS_EXE_PATH} ++ argv) },
+        .{
+            .argv = &(.{@as([]const u8, ZQJS_EXE_PATH)} ++ argv),
+        },
     );
 }
 
-test "Help printing to 'stderr' and exiting with code '1' when only 'argv' length is 1" {
-    const actual = try runZqjs(.{});
+test "Help printing to 'stderr' and exiting with code '1' when 'argv' length is 1" {
+    const actual = try runZqjs(0, .{});
+    defer {
+        allocator.free(actual.stdout);
+        allocator.free(actual.stderr);
+    }
 
     try expectChildProcess(
-        .{ .stderrSnapshotPath = "snapshots/help_text_err", .exitCode = 1 },
+        .{
+            .stderrSnapshotPath = SNAPSHOTS_PATH ++ "help_text_err",
+
+            .exitCode = 1,
+        },
+
         actual,
     );
+
+    try testing.expectEqualStrings("", actual.stdout);
 }
